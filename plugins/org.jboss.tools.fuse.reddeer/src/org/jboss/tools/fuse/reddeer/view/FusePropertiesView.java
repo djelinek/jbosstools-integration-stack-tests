@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.reddeer.core.util.Display;
 import org.jboss.reddeer.eclipse.ui.views.properties.TabbedPropertyList;
 import org.jboss.reddeer.swt.impl.button.LabeledCheckBox;
@@ -80,11 +79,11 @@ public class FusePropertiesView extends AbstractViewExt {
 			else if (list.contains(value))
 				new LabeledCCombo(label).setSelection(value);
 			else
-				new LabeledCCombo(label).setSelection(list.get(list.size()-1));
+				new LabeledCCombo(label).setSelection(list.get(list.size() - 1));
 			return new LabeledCCombo(label).getSelection();
 		case CHECKBOX:
 			new LabeledCheckBox(label).click();
-			if(new LabeledCheckBox(label).isChecked())
+			if (new LabeledCheckBox(label).isChecked())
 				return "true";
 			else
 				return "false";
@@ -106,13 +105,7 @@ public class FusePropertiesView extends AbstractViewExt {
 			new LabeledTextExt("Id").setText(value);
 			break;
 		case PATTERN:
-			List<String> items = new LabeledCCombo("Pattern").getItems();
-			if (items.size() == 1)
-				new LabeledCCombo("Pattern").setSelection(items.get(0));
-			else if (items.contains(value))
-				new LabeledCCombo("Pattern").setSelection(value);
-			else
-				new LabeledCCombo("Pattern").setSelection(items.get(0));
+			new LabeledTextExt("Pattern").setText(value);
 			break;
 		case REF:
 			List<String> list = new LabeledCCombo("Ref (deprecated)").getItems();
@@ -139,7 +132,7 @@ public class FusePropertiesView extends AbstractViewExt {
 		case ID:
 			new LabeledTextExt("Id").getText();
 		case PATTERN:
-			return new LabeledCCombo("Pattern").getSelection();
+			new LabeledTextExt("Pattern").getText();
 		case REF:
 			return new LabeledCCombo("Ref (deprecated)").getSelection();
 		default:
@@ -174,22 +167,22 @@ public class FusePropertiesView extends AbstractViewExt {
 		});
 
 	}
-	
+
 	public String getLabel(final Widget widget) {
-		
+
 		activate();
 		final StringBuffer buff = new StringBuffer();
 
 		Display.syncExec(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				
+
 				Label label = (Label) widget;
 				buff.append(label.getText());
 			}
 		});
-		
+
 		return buff.toString();
 	}
 
@@ -250,7 +243,7 @@ public class FusePropertiesView extends AbstractViewExt {
 	 *            Label
 	 */
 	public void selectTab(String label) {
-		
+
 		activate();
 		List<String> old = new ArrayList<String>();
 
@@ -259,12 +252,12 @@ public class FusePropertiesView extends AbstractViewExt {
 		} catch (Exception ex) {
 			// probably not rendered yet
 		}
-		//new WaitUntil(new AnotherTabsRendered(old), TimePeriod.NORMAL, false);
+		// new WaitUntil(new AnotherTabsRendered(old), TimePeriod.NORMAL, false);
 
 		if (old.contains(label))
 			new TabbedPropertyList().selectTab(label);
 	}
-	
+
 	public List<String> getTabs() {
 
 		activate();
@@ -340,8 +333,9 @@ public class FusePropertiesView extends AbstractViewExt {
 				for (Iterator<Widget> iterator = list.iterator(); iterator.hasNext();) {
 					Widget widget = (Widget) iterator.next();
 					Widget temp = widget;
-					// this is not a very good solution, but so far it is sufficient -> in future think better solution variants
-					if (list.size() % 2 != 1) 
+					// this is not a very good solution, but so far it is sufficient -> in future think better solution
+					// variants
+					if (list.size() % 2 != 1)
 						widget = (Widget) iterator.next();
 					m.put(temp, widget);
 					// ----
@@ -353,32 +347,38 @@ public class FusePropertiesView extends AbstractViewExt {
 		return m;
 	}
 
-	private class AnotherTabsRendered extends AbstractWaitCondition {
+	public List<String> getAdvancedPropertiesText(final String tab) {
 
-		private List<String> old;
+		activate();
+		final CTabFolder folde = new DefaultCTabFolder().getSWTWidget();
+		final List<String> list = new ArrayList<>();
+		final ArrayList<String> listTab = new ArrayList<>();
 
-		public AnotherTabsRendered(List<String> old) {
-			this.old = old;
-		}
+		Display.syncExec(new Runnable() {
+			@Override
+			public void run() {
 
-		@Override
-		public boolean test() {
-			List<String> actual = new ArrayList<String>();
+				CTabItem[] tabs = new DefaultCTabFolder().getSWTWidget().getItems();
+				for (CTabItem item : tabs) {
+					listTab.add(item.getText());
+				}
+				// --
+				Control[] c = folde.getChildren();
+				Control[] childrens = ((Composite) c[listTab.indexOf(tab) + 1]).getChildren();
+				Label label = null;
 
-			try {
-				actual = new TabbedPropertyList().getTabs();
-			} catch (Exception ex) {
-				// probably not rendered yet
+				for (Control children : childrens) {
+					Widget w = ((Widget) children);
+					if (w instanceof Label) {
+						label = (Label) w;
+						list.add(label.getText());
+					}
+				}
+
 			}
+		});
 
-			return !actual.equals(old);
-		}
-
-		@Override
-		public String description() {
-			return "Wait for tabs of focused element to be rendered";
-		}
-
+		return list;
 	}
 
 }

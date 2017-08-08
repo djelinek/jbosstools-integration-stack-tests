@@ -23,7 +23,8 @@
 		<maven.settings>${project.build.directory}/requirements/emptysettings.xml</maven.settings>
 		<staging.repos>false</staging.repos>
 		<rd.skipUnfixedIssues>true</rd.skipUnfixedIssues>
-		<systemProperties>${integrationTestsSystemProperties} ${reddeerConfig} -Djboss.discovery.site.integration-stack-sap.feature=org.fusesource.ide.sap.feature.feature.group -Djboss.discovery.site.integration-stack-sap.url=${sap.url} -DlogDebug=${enable.debug.log} -Dmaven.settings=${maven.settings} -Dmaven.repository=${maven.repo} -Dstaging.repositories=${staging.repos} -Drd.skipUnfixedIssues=${rd.skipUnfixedIssues}</systemProperties>
+		<camel.catalog.version>camel-catalog-2.17.0.redhat-630254</camel.catalog.version>
+		<systemProperties>${integrationTestsSystemProperties} ${reddeerConfig} -Djboss.discovery.site.integration-stack-sap.feature=org.fusesource.ide.sap.feature.feature.group -Djboss.discovery.site.integration-stack-sap.url=${sap.url} -DlogDebug=${enable.debug.log} -Dmaven.settings=${maven.settings} -Dmaven.repository=${maven.repo} -Dstaging.repositories=${staging.repos} -Drd.skipUnfixedIssues=${rd.skipUnfixedIssues} -Dcamel.catalog=${camel.catalog.version}</systemProperties>
 	</properties>
 
 	<build>
